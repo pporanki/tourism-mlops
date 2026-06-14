@@ -34,7 +34,9 @@ load_dotenv()
 # --------------------------------------------------------------------------- #
 # Configuration                                                               #
 # --------------------------------------------------------------------------- #
-HF_USERNAME = os.getenv("HF_USERNAME", "prudvikrishna")
+# `or` (not a getenv default) so an EMPTY value -- e.g. an unset GitHub secret
+# that expands to "" -- also falls back instead of producing "/tourism".
+HF_USERNAME = os.getenv("HF_USERNAME") or "prudvikrishna"
 DATASET_REPO_ID = f"{HF_USERNAME}/tourism"   # same dataset repo as stage 1
 REPO_TYPE = "dataset"
 

@@ -43,7 +43,9 @@ load_dotenv()
 # --------------------------------------------------------------------------- #
 # Username drives the repo id. The second argument to getenv is a fallback
 # used only if the variable is not set anywhere.
-HF_USERNAME = os.getenv("HF_USERNAME", "prudvikrishna")
+# `or` (not a getenv default) so an EMPTY value -- e.g. an unset GitHub secret
+# that expands to "" -- also falls back instead of producing "/tourism".
+HF_USERNAME = os.getenv("HF_USERNAME") or "prudvikrishna"
 
 # Full id of the dataset repo on the Hub, e.g. "prudvikrishna/tourism".
 DATASET_REPO_ID = f"{HF_USERNAME}/tourism"

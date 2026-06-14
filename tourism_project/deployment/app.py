@@ -23,7 +23,7 @@ from huggingface_hub import hf_hub_download
 # --------------------------------------------------------------------------- #
 # Configuration                                                               #
 # --------------------------------------------------------------------------- #
-HF_USERNAME = os.getenv("HF_USERNAME", "prudvikrishna")
+HF_USERNAME = os.getenv("HF_USERNAME") or "prudvikrishna"   # empty-safe fallback
 MODEL_REPO_ID = f"{HF_USERNAME}/tourism-package-model"   # where train.py uploaded it
 MODEL_FILE = "best_tourism_model.joblib"                 # the serialised pipeline
 
