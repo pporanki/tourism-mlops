@@ -98,6 +98,6 @@ def main() -> None:
 
 
 # Standard Python entry-point guard: run main() only when this file is executed
-# directly (e.g. by CI), not when it is imported by another module.
+# directly (e.g. by CI), not when it is imported by another module. 
 if __name__ == "__main__":
     main()
