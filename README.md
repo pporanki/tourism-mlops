@@ -24,6 +24,8 @@ tourism-mlops/
 │       ├── requirements.txt         # deployment dependencies
 │       └── hosting.py               # push deployment files to HF Space
 ├── requirements.txt                 # pipeline dependencies
+├── .env.example                     # template for HF_USERNAME / HF_TOKEN
+├── .env                             # your real credentials (git-ignored)
 ├── .gitignore
 └── README.md
 ```
@@ -39,23 +41,29 @@ tourism-mlops/
 
 ## Configuration
 
-Set these as environment variables locally and as **GitHub repository secrets**
-for the Actions workflow:
+The pipeline reads two values from the environment:
 
 | Variable | Description |
 |----------|-------------|
 | `HF_USERNAME` | Your Hugging Face username (used to build all repo IDs) |
 | `HF_TOKEN` | A Hugging Face access token with **write** permission |
 
-> Replace the `HF_USERNAME` default in each script, or simply set the
-> `HF_USERNAME` environment variable / GitHub secret.
+**Locally** these come from a `.env` file loaded by `python-dotenv`.
+**In GitHub Actions** they come from **repository Secrets** (Settings → Secrets
+and variables → Actions). The code path is identical (`os.getenv(...)`), so
+nothing changes between local and CI.
+
+```bash
+cp .env.example .env      # then edit .env and paste your username + write token
+```
+
+> `.env` is git-ignored and never pushed. Only `.env.example` (the template) is committed.
 
 ## Run locally
 
 ```bash
 pip install -r requirements.txt
-export HF_USERNAME=<your-username>
-export HF_TOKEN=<your-write-token>
+cp .env.example .env      # fill in HF_USERNAME and HF_TOKEN
 
 python tourism_project/data/data_register.py
 python tourism_project/data/prep.py
