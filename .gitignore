@@ -8,3 +8,4 @@ mlruns/
 venv/
 tourism_project/data/train.csv
 tourism_project/data/test.csv
+Tourism_MLOps_Capstone.ipynb

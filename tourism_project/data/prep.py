@@ -19,6 +19,7 @@ Where it runs
 """
 
 import os
+import time
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -26,6 +27,7 @@ from dotenv import load_dotenv
 # hf_hub_download -> download a single file from the Hub and return its local path
 # HfApi          -> client used to upload the resulting splits back to the Hub
 from huggingface_hub import HfApi, hf_hub_download
+from huggingface_hub.errors import HfHubHTTPError
 from sklearn.model_selection import train_test_split
 
 # Load HF_USERNAME / HF_TOKEN from .env locally (no-op in CI / GitHub Secrets).
@@ -46,6 +48,30 @@ TEST_SIZE = 0.20         # hold out 20% of rows for the test set
 
 # Folder this script lives in; train.csv / test.csv are written here.
 LOCAL_DIR = os.path.dirname(__file__)
+
+
+def download_with_retry(retries: int = 5, base_delay: int = 10, **kwargs) -> str:
+    """
+    Call hf_hub_download, retrying on HTTP 429 (Too Many Requests).
+
+    GitHub Actions runners share IPs that the HF Hub rate-limits aggressively,
+    so a transient 429 should not fail the whole pipeline. We back off
+    exponentially (10s, 20s, 40s, ...) and re-raise any non-429 error or the
+    last 429 if every attempt is exhausted.
+    """
+    for attempt in range(1, retries + 1):
+        try:
+            return hf_hub_download(**kwargs)
+        except HfHubHTTPError as exc:
+            status = getattr(exc.response, "status_code", None)
+            if status != 429 or attempt == retries:
+                raise
+            delay = base_delay * (2 ** (attempt - 1))
+            print(f"[prep] HF rate-limited (429); retry {attempt}/{retries - 1} "
+                  f"in {delay}s...")
+            time.sleep(delay)
+    # Unreachable: the loop either returns or raises.
+    raise RuntimeError("download_with_retry exhausted without returning")
 
 
 def clean(df: pd.DataFrame) -> pd.DataFrame:
@@ -97,7 +123,7 @@ def main() -> None:
 
     # 1. Download the raw CSV from the HF dataset space. hf_hub_download caches
     #    the file locally and returns the path to it.
-    raw_path = hf_hub_download(
+    raw_path = download_with_retry(
         repo_id=DATASET_REPO_ID,
         filename="tourism.csv",
         repo_type=REPO_TYPE,
