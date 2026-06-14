@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+mlruns/
+*.joblib
+.env
+.venv/
+venv/
+tourism_project/data/train.csv
+tourism_project/data/test.csv

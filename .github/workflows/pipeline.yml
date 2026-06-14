@@ -1,0 +1,67 @@
+name: Tourism MLOps Pipeline
+
+# Run the full end-to-end pipeline on every push to main (and manually)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  HF_USERNAME: ${{ secrets.HF_USERNAME }}
+  HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+jobs:
+  # 1. Register the raw dataset on the Hugging Face dataset space
+  data-registration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Register raw data
+        run: python tourism_project/data/data_register.py
+
+  # 2. Clean, split, and upload train/test back to HF
+  data-preparation:
+    needs: data-registration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Prepare data
+        run: python tourism_project/data/prep.py
+
+  # 3. Tune, evaluate, and register the best model on the HF model hub
+  model-training:
+    needs: data-preparation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Train and register model
+        run: python tourism_project/model_building/train.py
+
+  # 4. Push deployment files to the Hugging Face Space (Streamlit front-end)
+  deployment:
+    needs: model-training
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Deploy to Hugging Face Space
+        run: python tourism_project/deployment/hosting.py
