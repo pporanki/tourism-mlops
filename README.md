@@ -24,7 +24,6 @@ tourism-mlops/
 │       ├── requirements.txt         # deployment dependencies
 │       └── hosting.py               # push deployment files to HF Space
 ├── requirements.txt                 # pipeline dependencies
-├── .env.example                     # template for HF_USERNAME / HF_TOKEN
 ├── .env                             # your real credentials (git-ignored)
 ├── .gitignore
 └── README.md
@@ -50,20 +49,16 @@ The pipeline reads two values from the environment:
 
 **Locally** these come from a `.env` file loaded by `python-dotenv`.
 **In GitHub Actions** they come from **repository Secrets** (Settings → Secrets
-and variables → Actions). The code path is identical (`os.getenv(...)`), so
+and variables → Actions-->new repository secrets). The code path is identical (`os.getenv(...)`), so
 nothing changes between local and CI.
 
 ```bash
-cp .env.example .env      # then edit .env and paste your username + write token
-```
-
-> `.env` is git-ignored and never pushed. Only `.env.example` (the template) is committed.
+> `.env` is git-ignored and never pushed.
 
 ## Run locally
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env      # fill in HF_USERNAME and HF_TOKEN
 
 python tourism_project/data/data_register.py
 python tourism_project/data/prep.py
@@ -73,7 +68,7 @@ python tourism_project/deployment/hosting.py
 
 ## Links
 
-- **GitHub repository:** `https://github.com/prudvikrishna/tourism-mlops`
+- **GitHub repository:** `https://github.com/pporanki/tourism-mlops`
 - **Hugging Face dataset:** `https://huggingface.co/datasets/prudvikrishna/tourism`
 - **Hugging Face model:** `https://huggingface.co/prudvikrishna/tourism-package-model`
 - **Hugging Face Space (Streamlit):** `https://huggingface.co/spaces/prudvikrishna/tourism-package-predictor`
